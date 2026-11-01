@@ -1,0 +1,138 @@
+{
+  "entities": {
+    "Project": {
+      "title": "Project",
+      "description": "A freelancer project tracked in SoloWork.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID." },
+        "name": { "type": "string", "description": "Project title (1-120 chars)." },
+        "clientName": { "type": "string", "description": "Associated client name (1-100 chars)." },
+        "clientAvatarColor": { "type": "string", "description": "Hex color for client avatar badge." },
+        "progress": { "type": "integer", "description": "Completion percentage (0-100)." },
+        "dueDate": { "type": "string", "description": "Formatted due date string." },
+        "budget": { "type": "integer", "description": "Project budget in USD." },
+        "status": { "type": "string", "enum": ["Active", "Completed", "On Hold"] },
+        "category": { "type": "string", "description": "Project category." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["userId", "name", "clientName", "clientAvatarColor", "progress", "dueDate", "budget", "status", "category", "createdAt", "updatedAt"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "A freelance client in SoloWork.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID." },
+        "name": { "type": "string", "description": "Client contact name." },
+        "company": { "type": "string", "description": "Client company name." },
+        "email": { "type": "string", "description": "Client contact email." },
+        "status": { "type": "string", "enum": ["Active", "Lead", "Archived"] },
+        "totalBilled": { "type": "integer", "description": "Total billed USD." },
+        "projectsCount": { "type": "integer", "description": "Number of projects for this client." },
+        "avatarColor": { "type": "string", "description": "Hex color for avatar." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["userId", "name", "company", "email", "status", "totalBilled", "projectsCount", "avatarColor", "createdAt", "updatedAt"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "A client invoice in SoloWork.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID." },
+        "invoiceNumber": { "type": "string", "description": "Invoice reference code." },
+        "clientName": { "type": "string", "description": "Client billed." },
+        "projectTitle": { "type": "string", "description": "Associated project title." },
+        "amountCents": { "type": "integer", "description": "Invoice amount in cents." },
+        "status": { "type": "string", "enum": ["Paid", "Pending", "Overdue"] },
+        "issuedDate": { "type": "string", "description": "Formatted issued date." },
+        "dueDate": { "type": "string", "description": "Formatted due date." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["userId", "invoiceNumber", "clientName", "projectTitle", "amountCents", "status", "issuedDate", "dueDate", "createdAt", "updatedAt"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A task item on the SoloWork Task Board and Dashboard checklist.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID." },
+        "title": { "type": "string", "description": "Task title." },
+        "projectName": { "type": "string", "description": "Project label." },
+        "status": { "type": "string", "enum": ["Todo", "In Progress", "Review", "Done"] },
+        "priority": { "type": "string", "enum": ["High", "Medium", "Low"] },
+        "completed": { "type": "boolean", "description": "Whether the task is completed." },
+        "dueDate": { "type": "string", "description": "Formatted due date." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["userId", "title", "projectName", "status", "priority", "completed", "dueDate", "createdAt", "updatedAt"]
+    },
+    "TimeLog": {
+      "title": "TimeLog",
+      "description": "A tracked time session in SoloWork.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID." },
+        "projectName": { "type": "string", "description": "Project name." },
+        "taskDescription": { "type": "string", "description": "Description of work performed." },
+        "durationMinutes": { "type": "integer", "description": "Duration in minutes." },
+        "hourlyRate": { "type": "integer", "description": "Hourly rate in USD." },
+        "loggedDate": { "type": "string", "description": "Formatted date of log." },
+        "billable": { "type": "boolean", "description": "Whether the session is billable." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["userId", "projectName", "taskDescription", "durationMinutes", "hourlyRate", "loggedDate", "billable", "createdAt", "updatedAt"]
+    },
+    "UserSettings": {
+      "title": "UserSettings",
+      "description": "Live theme and layout customization preferences for a SoloWork user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID." },
+        "themeMode": { "type": "string", "enum": ["Dark", "Light"] },
+        "themePreset": { "type": "string", "enum": ["Classic Dark", "Daylight", "Solarized", "Cyberpunk"] },
+        "accentColor": { "type": "string", "enum": ["Indigo", "Emerald", "Violet", "Amber", "Crimson"] },
+        "fontFamily": { "type": "string", "enum": ["Inter", "Roboto", "Poppins"] },
+        "customizeLayoutStyle": { "type": "boolean" },
+        "sidebarCompact": { "type": "boolean" },
+        "displayName": { "type": "string" },
+        "roleTitle": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()." }
+      },
+      "required": ["userId", "themeMode", "themePreset", "accentColor", "fontFamily", "customizeLayoutStyle", "sidebarCompact", "displayName", "roleTitle", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/Project" },
+      "description": "Stores freelancer projects scoped by userId."
+    },
+    "/clients/{clientId}": {
+      "schema": { "$ref": "#/entities/Client" },
+      "description": "Stores freelancer clients scoped by userId."
+    },
+    "/invoices/{invoiceId}": {
+      "schema": { "$ref": "#/entities/Invoice" },
+      "description": "Stores client invoices scoped by userId."
+    },
+    "/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/Task" },
+      "description": "Stores Kanban and checklist tasks scoped by userId."
+    },
+    "/timeLogs/{logId}": {
+      "schema": { "$ref": "#/entities/TimeLog" },
+      "description": "Stores tracked time logs scoped by userId."
+    },
+    "/userSettings/{userId}": {
+      "schema": { "$ref": "#/entities/UserSettings" },
+      "description": "Stores per-user theme and layout settings."
+    }
+  }
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Top ribbon (Amber-Coral) -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M54,24 L76,36 L54,48 L32,36 Z" />
+    <!-- Middle ribbon (Violet-Rose) -->
+    <path
+        android:fillColor="#EC4899"
+        android:pathData="M32,36 L76,60 L76,72 L32,48 Z" />
+    <!-- Bottom ribbon (Indigo-Emerald) -->
+    <path
+        android:fillColor="#6366F1"
+        android:pathData="M54,60 L76,72 L54,84 L32,72 Z" />
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M32,60 L54,72 L54,84 L32,72 Z" />
+</vector>

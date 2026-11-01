@@ -1,0 +1,216 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 2. Hardened Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isValidTimestamps(data) {
+      return data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    // 3. Entity Validation Blueprints
+    function isValidProject(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             data.clientName is string && data.clientName.size() >= 1 && data.clientName.size() <= 100 &&
+             data.clientAvatarColor is string && data.clientAvatarColor.size() >= 1 && data.clientAvatarColor.size() <= 20 &&
+             data.progress is int && data.progress >= 0 && data.progress <= 100 &&
+             data.dueDate is string && data.dueDate.size() >= 1 && data.dueDate.size() <= 40 &&
+             data.budget is int && data.budget >= 0 && data.budget <= 100000000 &&
+             data.status is string && data.status in ['Active', 'Completed', 'On Hold'] &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 50 &&
+             isValidTimestamps(data);
+    }
+
+    function isValidClient(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 100 &&
+             data.company is string && data.company.size() >= 1 && data.company.size() <= 100 &&
+             data.email is string && data.email.size() >= 1 && data.email.size() <= 120 &&
+             data.status is string && data.status in ['Active', 'Lead', 'Archived'] &&
+             data.totalBilled is int && data.totalBilled >= 0 && data.totalBilled <= 100000000 &&
+             data.projectsCount is int && data.projectsCount >= 0 && data.projectsCount <= 1000 &&
+             data.avatarColor is string && data.avatarColor.size() >= 1 && data.avatarColor.size() <= 20 &&
+             isValidTimestamps(data);
+    }
+
+    function isValidInvoice(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.invoiceNumber is string && data.invoiceNumber.size() >= 1 && data.invoiceNumber.size() <= 40 &&
+             data.clientName is string && data.clientName.size() >= 1 && data.clientName.size() <= 100 &&
+             data.projectTitle is string && data.projectTitle.size() >= 1 && data.projectTitle.size() <= 120 &&
+             data.amountCents is int && data.amountCents >= 0 && data.amountCents <= 1000000000 &&
+             data.status is string && data.status in ['Paid', 'Pending', 'Overdue'] &&
+             data.issuedDate is string && data.issuedDate.size() >= 1 && data.issuedDate.size() <= 40 &&
+             data.dueDate is string && data.dueDate.size() >= 1 && data.dueDate.size() <= 40 &&
+             isValidTimestamps(data);
+    }
+
+    function isValidTask(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.title is string && data.title.size() >= 1 && data.title.size() <= 200 &&
+             data.projectName is string && data.projectName.size() >= 1 && data.projectName.size() <= 120 &&
+             data.status is string && data.status in ['Todo', 'In Progress', 'Review', 'Done'] &&
+             data.priority is string && data.priority in ['High', 'Medium', 'Low'] &&
+             data.completed is bool &&
+             data.dueDate is string && data.dueDate.size() >= 1 && data.dueDate.size() <= 40 &&
+             isValidTimestamps(data);
+    }
+
+    function isValidTimeLog(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.projectName is string && data.projectName.size() >= 1 && data.projectName.size() <= 120 &&
+             data.taskDescription is string && data.taskDescription.size() >= 1 && data.taskDescription.size() <= 200 &&
+             data.durationMinutes is int && data.durationMinutes >= 1 && data.durationMinutes <= 100000 &&
+             data.hourlyRate is int && data.hourlyRate >= 0 && data.hourlyRate <= 10000 &&
+             data.loggedDate is string && data.loggedDate.size() >= 1 && data.loggedDate.size() <= 40 &&
+             data.billable is bool &&
+             isValidTimestamps(data);
+    }
+
+    function isValidUserSettings(data) {
+      return data.userId is string && data.userId == request.auth.uid && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.themeMode is string && data.themeMode in ['Dark', 'Light'] &&
+             data.themePreset is string && data.themePreset in ['Classic Dark', 'Daylight', 'Solarized', 'Cyberpunk'] &&
+             data.accentColor is string && data.accentColor in ['Indigo', 'Emerald', 'Violet', 'Amber', 'Crimson'] &&
+             data.fontFamily is string && data.fontFamily in ['Inter', 'Roboto', 'Poppins'] &&
+             data.customizeLayoutStyle is bool &&
+             data.sidebarCompact is bool &&
+             data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 80 &&
+             data.roleTitle is string && data.roleTitle.size() >= 1 && data.roleTitle.size() <= 80 &&
+             isValidTimestamps(data);
+    }
+
+    // 4. Collection Rules
+    match /projects/{projectId} {
+      allow get: if isSignedIn() && isValidId(projectId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() &&
+                       isValidId(projectId) &&
+                       incoming().keys().hasAll(['userId', 'name', 'clientName', 'clientAvatarColor', 'progress', 'dueDate', 'budget', 'status', 'category', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'name', 'clientName', 'clientAvatarColor', 'progress', 'dueDate', 'budget', 'status', 'category', 'createdAt', 'updatedAt']) &&
+                       isValidProject(incoming());
+      allow update: if isSignedIn() &&
+                       isValidId(projectId) &&
+                       isValidProject(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'clientName', 'clientAvatarColor', 'progress', 'dueDate', 'budget', 'status', 'category', 'updatedAt']);
+      allow delete: if isSignedIn() && isValidId(projectId) && existing().userId == request.auth.uid;
+    }
+
+    match /clients/{clientId} {
+      allow get: if isSignedIn() && isValidId(clientId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() &&
+                       isValidId(clientId) &&
+                       incoming().keys().hasAll(['userId', 'name', 'company', 'email', 'status', 'totalBilled', 'projectsCount', 'avatarColor', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'name', 'company', 'email', 'status', 'totalBilled', 'projectsCount', 'avatarColor', 'createdAt', 'updatedAt']) &&
+                       isValidClient(incoming());
+      allow update: if isSignedIn() &&
+                       isValidId(clientId) &&
+                       isValidClient(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'company', 'email', 'status', 'totalBilled', 'projectsCount', 'avatarColor', 'updatedAt']);
+      allow delete: if isSignedIn() && isValidId(clientId) && existing().userId == request.auth.uid;
+    }
+
+    match /invoices/{invoiceId} {
+      allow get: if isSignedIn() && isValidId(invoiceId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() &&
+                       isValidId(invoiceId) &&
+                       incoming().keys().hasAll(['userId', 'invoiceNumber', 'clientName', 'projectTitle', 'amountCents', 'status', 'issuedDate', 'dueDate', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'invoiceNumber', 'clientName', 'projectTitle', 'amountCents', 'status', 'issuedDate', 'dueDate', 'createdAt', 'updatedAt']) &&
+                       isValidInvoice(incoming());
+      allow update: if isSignedIn() &&
+                       isValidId(invoiceId) &&
+                       isValidInvoice(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['invoiceNumber', 'clientName', 'projectTitle', 'amountCents', 'status', 'issuedDate', 'dueDate', 'updatedAt']);
+      allow delete: if isSignedIn() && isValidId(invoiceId) && existing().userId == request.auth.uid;
+    }
+
+    match /tasks/{taskId} {
+      allow get: if isSignedIn() && isValidId(taskId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() &&
+                       isValidId(taskId) &&
+                       incoming().keys().hasAll(['userId', 'title', 'projectName', 'status', 'priority', 'completed', 'dueDate', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'title', 'projectName', 'status', 'priority', 'completed', 'dueDate', 'createdAt', 'updatedAt']) &&
+                       isValidTask(incoming());
+      allow update: if isSignedIn() &&
+                       isValidId(taskId) &&
+                       isValidTask(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'projectName', 'status', 'priority', 'completed', 'dueDate', 'updatedAt']);
+      allow delete: if isSignedIn() && isValidId(taskId) && existing().userId == request.auth.uid;
+    }
+
+    match /timeLogs/{logId} {
+      allow get: if isSignedIn() && isValidId(logId) && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() &&
+                       isValidId(logId) &&
+                       incoming().keys().hasAll(['userId', 'projectName', 'taskDescription', 'durationMinutes', 'hourlyRate', 'loggedDate', 'billable', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'projectName', 'taskDescription', 'durationMinutes', 'hourlyRate', 'loggedDate', 'billable', 'createdAt', 'updatedAt']) &&
+                       isValidTimeLog(incoming());
+      allow update: if isSignedIn() &&
+                       isValidId(logId) &&
+                       isValidTimeLog(incoming()) &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['projectName', 'taskDescription', 'durationMinutes', 'hourlyRate', 'loggedDate', 'billable', 'updatedAt']);
+      allow delete: if isSignedIn() && isValidId(logId) && existing().userId == request.auth.uid;
+    }
+
+    match /userSettings/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if isSignedIn() && existing().userId == request.auth.uid;
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll(['userId', 'themeMode', 'themePreset', 'accentColor', 'fontFamily', 'customizeLayoutStyle', 'sidebarCompact', 'displayName', 'roleTitle', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'themeMode', 'themePreset', 'accentColor', 'fontFamily', 'customizeLayoutStyle', 'sidebarCompact', 'displayName', 'roleTitle', 'createdAt', 'updatedAt']) &&
+                       isValidUserSettings(incoming());
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidUserSettings(incoming()) &&
+                       request.auth.uid == userId &&
+                       existing().userId == request.auth.uid &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['themeMode', 'themePreset', 'accentColor', 'fontFamily', 'customizeLayoutStyle', 'sidebarCompact', 'displayName', 'roleTitle', 'updatedAt']);
+      allow delete: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+    }
+  }
+}

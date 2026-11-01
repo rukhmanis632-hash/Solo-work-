@@ -1,0 +1,6 @@
+{
+  "name": "SoloWork",
+  "description": "All-in-one Freelancer Management SaaS workspace with projects, clients, invoices, task board, time tracker, analytics, and live theme engine.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
